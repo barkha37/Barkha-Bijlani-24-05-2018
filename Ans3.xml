@@ -1,0 +1,35 @@
+3. Write a script OR Convey a proven mechanism to retrieve the URL of artifacts uploaded in Nexus / Artifactory via the Jenkins job. 
+
+ 
+ # The below script can retrieve the latest artifacts from the Artifactory/Nexus repo 
+ 
+ 
+ # Artifactory location 
+ server=http://artifactory.example.com/artifactory 
+ repo=snapshot 
+ 
+ 
+ # Maven artifact location 
+ name=artifact 
+ artifact=com/example/$name 
+ path=$server/$repo/$artifact 
+ 
+ 
+ # Using curl command you can transfer data from or to a server, using one of the protocols: HTTP, HTTPS, FTP, etc,. 
+ 
+ 
+ version=`curl -s $path/maven-metadata.xml | grep latest | sed "s/.*<latest>\([^<]*\)<\/latest>.*/\1/"` 
+ build=`curl -s $path/$version/maven-metadata.xml | grep '<value>' | head -1 | sed "s/.*<value>\([^<]*\)<\/value>.*/\1/"` 
+ jar=$name-$build.jar 
+ url=$path/$version/$jar 
+ 
+ 
+ # Retrieve 
+ # Echo provides the artifact url 
+ 
+ 
+ echo $url 
+ 
+ wget -q -N $url 
+
+ #end of script

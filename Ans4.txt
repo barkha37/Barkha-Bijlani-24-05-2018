@@ -1,0 +1,39 @@
+4. Prepare a Jenkins pipeline job (DSL / groovy script) to satisfy following CI-Cd pipeline : 
+ •	Send approval email to Release Manager after the application packaging phase  
+ •	Trigger the Jenkins job  on reception of the approval email for the above job . 
+ 
+ 
+ Solution: 
+ This could be achieved, by using "Workflow Plugin" through groovy script: 
+ 
+ 
+ stage 'build'  
+ node { 
+ git 'https://github.com/cloudbees/todo-api.git' withEnv(["PATH+MAVEN=${tool 'm3'}/bin"]) { 
+ sh "mvn -B –Dmaven.test.failure.ignore=true clean package" 
+ 	} 
+ } 
+ stage 'unit-test' 
+ node { 
+ sh "mvn clean verify"  
+ } 
+ stage 'code-quality' 
+ node { 
+ sh "mvn sonar:sonar"  
+ } 
+ stage 'approve' 
+ node { 
+    // We need to wait for input from manager, 
+    // sending an email for approval 
+ mail (to: 'release.manager@zycus.com', 
+    subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is waiting for approval", 
+    body: "Please go to ${env.BUILD_URL}."); 
+ timeout(time: 1, unit: 'DAYS') { 
+ input message: 'Approve if you wish to deploy?', submitter: 'manager' 
+ 	} 
+ } 
+ stage name:'deploy', concurrency: 1 
+ node { 
+ sh "mvn cargo:deploy" 
+ echo "deployed"  
+ } 

@@ -1,0 +1,22 @@
+2. How can you establish a connection between two or many different Jenkins jobs (hosted on distinct servers) to pass the parameters / upstream - downstream jobs etc ..( without using Master-Slave connection in a secured way) 
+ 
+ 
+Solution: This can be done through 2 ways: 
+ 
+a) For such case, we can use “Parameterized Trigger Plugin”. –> https://wiki.jenkins-ci.org/display/JENKINS/Parameterized+Trigger+Plugin.
+
+ Once this plugin is installed , go to Job 1(upstream job) > Post-Build Actions > Select ”Trigger parameterized build on other projects” 
+ 
+ Under this plugin, in the predefined parameters section mention the parameter you wish to pass. 
+ For Example, I need to pass "USER_NAME": 
+ 
+ Temp=${USER_NAME} 
+ 
+ In the Downstream Job: To access this parameter use $Temp where you need it. Let's say, in the Editable Email Notification section. 
+ 
+ 
+b) Another way to achieve this is by using "Workflow plugin". 
+  
+ Here you can pass a groovy script and make a connection between two or more jenkins jobs. For Example: 
+ 
+ def job = build job: 'sample-job', parameters: [[$class: 'StringParameterValue', name: 'user', value: 'Gaurav' 
